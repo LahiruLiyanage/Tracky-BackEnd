@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose/dist/mongoose.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AuthModule } from './auth/auth.module';
 
 // const uri =
 //   'mongodb+srv://lahirul:farc35wlD1JM124R@cluster0.frhslxf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
@@ -14,6 +15,7 @@ import { TasksModule } from './tasks/tasks.module';
       'mongodb+srv://lahirul:farc35wlD1JM124R@cluster0.frhslxf.mongodb.net/Tasks?retryWrites=true&w=majority&appName=Cluster0',
     ),
     TasksModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
