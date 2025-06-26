@@ -10,7 +10,7 @@ export class AuthService {
   constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
 
   async signup(signupData: SignupDto) {
-    const { email, password } = signupData;
+    const { name, email, password } = signupData;
     // Check if email in use
     const emailInUse = await this.UserModel.findOne({
       email,
@@ -19,7 +19,7 @@ export class AuthService {
       throw new BadRequestException('Email already in use');
     }
     // Hash Password
-    const hashedPassword = bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     // Create user document and save in mongodb
 
     await this.UserModel.create({
@@ -28,4 +28,11 @@ export class AuthService {
       password: hashedPassword,
     });
   }
+
+  async login(credentials: { email: string; password: string }) {
+    // Find if user exists by email
+
+    // Compare enetered password with existing hashed password
+
+    //Generate JWT tokens
 }
