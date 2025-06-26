@@ -8,10 +8,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
 @Injectable()
 export class AuthService {
-  constructor(@InjectModel(User.name) private UserModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private UserModel: Model<User>,
+    private jwtService: JwtService,
+  ) {}
 
   async signup(signupData: SignupDto) {
     const { name, email, password } = signupData;
@@ -46,6 +50,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
     //Generate JWT tokens
-    return { message: 'Login successful', userId: user._id };
+    return this.generateUserTokens(user._id);
+  }
+
+  generateUserTokens(userId) {
+    console.log('Generating tokens for user:', userId);
+    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+    return {
+      accessToken,
+    };
   }
 }
