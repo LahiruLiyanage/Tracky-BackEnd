@@ -4,10 +4,10 @@ export type TaskDocument = Task & Document;
 
 @Schema()
 export class Task {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   title: string;
 
   @Prop({ required: true })
