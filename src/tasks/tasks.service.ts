@@ -28,11 +28,12 @@ export class TasksService {
   }
 
   async delete(id: string): Promise<{ message: string }> {
+    console.log('Deleting task:', id);
     const task = await this.getTaskById(id);
     if (!task) {
       return { message: 'Task not found' };
     }
-    await this.update(id, { ...task, deleted: true });
+    await this.taskModel.deleteOne({ _id: task._id });
     return { message: 'Task deleted successfully' };
   }
 }

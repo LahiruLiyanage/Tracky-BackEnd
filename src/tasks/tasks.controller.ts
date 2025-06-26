@@ -33,17 +33,21 @@ export class TasksController {
   async updateTask(
     @Param('id') id: string,
     @Body() task: Task,
-  ): Promise<Task | null> {
-    return this.tasksService.update(id, task);
+  ): Promise<Task | { message: string }> {
+    const updatedTask = await this.tasksService.update(id, task);
+    if (updatedTask) {
+      return updatedTask;
+    } else {
+      return { message: 'Task not found' };
+    }
   }
 
   @Delete(':id')
   async deleteTask(@Param('id') id: string): Promise<{ message: string }> {
     const task = await this.tasksService.getTaskById(id);
-    if (!task) {
-      return { message: 'Task not found' };
+    if (task) {
+      return this.tasksService.delete(id);
     }
-    await this.tasksService.update(id, { ...task, deleted: true });
-    return { message: 'Task deleted successfully' };
+    return { message: 'Task not found' };
   }
 }
