@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './dto/task.model';
 
@@ -27,5 +35,15 @@ export class TasksController {
     @Body() task: Task,
   ): Promise<Task | null> {
     return this.tasksService.update(id, task);
+  }
+
+  @Delete(':id')
+  async deleteTask(@Param('id') id: string): Promise<{ message: string }> {
+    const task = await this.tasksService.getTaskById(id);
+    if (!task) {
+      return { message: 'Task not found' };
+    }
+    await this.tasksService.update(id, { ...task, deleted: true });
+    return { message: 'Task deleted successfully' };
   }
 }

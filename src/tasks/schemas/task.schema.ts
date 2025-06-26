@@ -12,6 +12,9 @@ export class Task {
 
   @Prop({ required: true })
   description: string;
+
+  @Prop({ default: false })
+  deleted?: boolean;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
