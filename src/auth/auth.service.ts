@@ -10,6 +10,17 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 
+interface JWTUserPayload {
+  id: string;
+}
+
+interface UserProps {
+  _id: string;
+  name: string;
+  email: string;
+  password: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -40,22 +51,26 @@ export class AuthService {
   async login(credentials: { email: string; password: string }) {
     const { email, password } = credentials;
     // Find if user exists by email
-    const user = await this.UserModel.findOne({ email });
+    const user: UserProps | null = await this.UserModel.findOne({ email });
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    console.log('User found:', user);
+    const userId: string = user._id.toString();
     // Compare entered password with existing hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
     //Generate JWT tokens
-    return this.generateUserTokens(user._id);
+    console.log('User logged in:', user._id);
+    return this.generateUserTokens(userId);
   }
 
-  generateUserTokens(userId) {
-    console.log('Generating tokens for user:', userId);
-    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+  generateUserTokens(userId: string) {
+    const payload: JWTUserPayload = { id: userId };
+    console.log('Generating tokens for user:', payload);
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1h' });
     return {
       accessToken,
     };
