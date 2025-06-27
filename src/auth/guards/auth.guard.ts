@@ -13,24 +13,25 @@ import { Request } from 'express';
 export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
+    console.log('Extracted token:', token);
+
     // console.log(request['user']);
 
-    console.log('Extracted token:', token);
     if (!token) {
       throw new UnauthorizedException('Hello : Invalid token');
     }
 
     try {
-      const payload = this.jwtService.verifyAsync(token, {
+      const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
-      request['user'] = payload;
+
+      console.log('Payload:', payload);
+      request.userId = payload.userId;
     } catch (error) {
       Logger.error('Token verification failed', error);
       throw new UnauthorizedException('Invalid token');
@@ -39,6 +40,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    return request.headers.authorization?.split(' ')[1];
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }
