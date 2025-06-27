@@ -61,12 +61,31 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
     //Generate JWT tokens
-    return this.generateUserTokens(userId);
+    const tokens = await this.generateUserTokens(userId);
+    return {
+      ...tokens,
+      userId: user._id,
+    };
   }
 
-  generateUserTokens(userId: string) {
+  async refreshTokens(refreshToken: string) {
+    const token = await this.RefreshTokenModel.findOneAndDelete({
+      token: refreshToken,
+      expiryDate: { $gte: new Date() },
+    });
+
+    if (!token) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    return this.generateUserTokens(token.userId);
+  }
+
+  async generateUserTokens(userId: string) {
     const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
     const refreshToken = uuidv4();
+
+    await this.storeRefreshToken(refreshToken, userId);
     return {
       accessToken,
       refreshToken,
