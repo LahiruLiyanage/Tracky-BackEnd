@@ -17,8 +17,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
-    console.log('Extracted token:', token);
-
+    // console.log('Extracted token:', token);
     // console.log(request['user']);
 
     if (!token) {
@@ -30,7 +29,7 @@ export class AuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
 
-      console.log('Payload:', payload);
+      // console.log('Payload:', payload);
       request.userId = payload.userId;
     } catch (error) {
       Logger.error('Token verification failed', error);

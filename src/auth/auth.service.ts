@@ -23,7 +23,8 @@ interface UserProps {
 export class AuthService {
   constructor(
     @InjectModel(User.name) private UserModel: Model<User>,
-    @InjectModel('RefreshToken') private RefreshTokenModel: Model<RefreshToken>,
+    @InjectModel(RefreshToken.name)
+    private RefreshTokenModel: Model<RefreshToken>,
     private jwtService: JwtService,
   ) {}
 
@@ -55,6 +56,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
     const userId: string = user._id.toString();
+    // console.log('User ID:', userId);
     // Compare entered password with existing hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
@@ -69,7 +71,7 @@ export class AuthService {
   }
 
   async refreshTokens(refreshToken: string) {
-    const token = await this.RefreshTokenModel.findOneAndDelete({
+    const token = await this.RefreshTokenModel.findOne({
       token: refreshToken,
       expiryDate: { $gte: new Date() },
     });
@@ -83,8 +85,10 @@ export class AuthService {
 
   async generateUserTokens(userId: string) {
     const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+
     const refreshToken = uuidv4();
 
+    // console.log('Generating tokens for user ID:', userId);
     await this.storeRefreshToken(refreshToken, userId);
     return {
       accessToken,
@@ -93,14 +97,18 @@ export class AuthService {
   }
 
   async storeRefreshToken(token: string, userId: string) {
+    // console.log('Storing refresh token for user ID:', userId);
+    // console.log('Token:', token);
     //Calculating expiry date 3 days from now
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 3);
 
-    await this.RefreshTokenModel.create({
-      token,
-      userId,
-      expiryDate,
-    });
+    await this.RefreshTokenModel.updateOne(
+      { userId },
+      { $set: { expiryDate, token } },
+      {
+        upsert: true,
+      },
+    );
   }
 }
