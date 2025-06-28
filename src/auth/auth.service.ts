@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { SignupDto } from './dtos/signup.dto';
@@ -110,5 +111,27 @@ export class AuthService {
         upsert: true,
       },
     );
+  }
+
+  async changePassword(userId, oldPassword: string, newPassword: string) {
+    //Find the User
+    const user = await this.UserModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Compare the old password with password in DB
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      throw new UnauthorizedException('Old password is incorrect');
+    }
+
+    // Change user's password (Need to Hash this)
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = newHashedPassword;
+    await user.save();
+    return {
+      message: 'Password changed successfully',
+    };
   }
 }
