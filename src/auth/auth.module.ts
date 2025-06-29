@@ -9,6 +9,7 @@ import {
   RefreshToken,
   RefreshTokenSchema,
 } from './schemas/refresh.token.schema';
+import { ResetTokenSchema } from './schemas/reset-token.schema';
 
 @Module({
   imports: [
@@ -20,6 +21,10 @@ import {
       {
         name: RefreshToken.name,
         schema: RefreshTokenSchema,
+      },
+      {
+        name: 'ResetToken',
+        schema: ResetTokenSchema,
       },
     ]),
     JwtModule.registerAsync({

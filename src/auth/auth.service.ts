@@ -12,6 +12,8 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { RefreshToken } from './schemas/refresh.token.schema';
 import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
+import { ResetToken } from './schemas/reset-token.schema';
 
 interface UserProps {
   _id: string;
@@ -27,6 +29,7 @@ export class AuthService {
     @InjectModel(RefreshToken.name)
     private RefreshTokenModel: Model<RefreshToken>,
     private jwtService: JwtService,
+    private ResetTokenModel: Model<ResetToken>,
   ) {}
 
   async signup(signupData: SignupDto) {
@@ -132,6 +135,31 @@ export class AuthService {
     await user.save();
     return {
       message: 'Password changed successfully',
+    };
+  }
+
+  async forgotPassword(email: string) {
+    // Check that user exists with the given email
+    const user = await this.UserModel.findOne({ email });
+    //If user exists, generate password reset link
+    if (user) {
+      // Using nonoid package
+      const resetToken = nanoid(64);
+
+      const expiryDate = new Date();
+      expiryDate.setHours(expiryDate.getHours() + 1); // 1 hour expiry
+
+      await this.ResetTokenModel.create({
+        token: resetToken,
+        userId: user._id,
+        expiryDate,
+      });
+    }
+
+    // Send the link to the user's email (Using nodemailer)
+    return {
+      message:
+        'If the email is registered, a password reset link has been sent.',
     };
   }
 }
