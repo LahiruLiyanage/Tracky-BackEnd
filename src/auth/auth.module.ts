@@ -10,6 +10,7 @@ import {
   RefreshTokenSchema,
 } from './schemas/refresh.token.schema';
 import { ResetTokenSchema } from './schemas/reset-token.schema';
+import { MailService } from './services/mail.service';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { ResetTokenSchema } from './schemas/reset-token.schema';
     ConfigModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, MailService],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

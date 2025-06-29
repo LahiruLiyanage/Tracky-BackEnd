@@ -14,6 +14,7 @@ import { RefreshToken } from './schemas/refresh.token.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { nanoid } from 'nanoid';
 import { ResetToken } from './schemas/reset-token.schema';
+import { MailService } from './services/mail.service';
 
 interface UserProps {
   _id: string;
@@ -28,8 +29,10 @@ export class AuthService {
     @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(RefreshToken.name)
     private RefreshTokenModel: Model<RefreshToken>,
-    private jwtService: JwtService,
+    @InjectModel(ResetToken.name)
     private ResetTokenModel: Model<ResetToken>,
+    private jwtService: JwtService,
+    private mailService: MailService, // Injecting MailService to send emails
   ) {}
 
   async signup(signupData: SignupDto) {
@@ -84,7 +87,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    return this.generateUserTokens(token.userId);
+    return this.generateUserTokens(token.userId.toString());
   }
 
   async generateUserTokens(userId: string) {
@@ -143,20 +146,21 @@ export class AuthService {
     const user = await this.UserModel.findOne({ email });
     //If user exists, generate password reset link
     if (user) {
-      // Using nonoid package
-      const resetToken = nanoid(64);
-
       const expiryDate = new Date();
       expiryDate.setHours(expiryDate.getHours() + 1); // 1 hour expiry
 
+      // Using nanoid package
+      const resetToken = nanoid(64);
       await this.ResetTokenModel.create({
         token: resetToken,
         userId: user._id,
         expiryDate,
       });
+
+      // Send the link to the user's email (Using nodemailer)
+      void this.mailService.sendPasswordResetEmail(email, resetToken);
     }
 
-    // Send the link to the user's email (Using nodemailer)
     return {
       message:
         'If the email is registered, a password reset link has been sent.',
