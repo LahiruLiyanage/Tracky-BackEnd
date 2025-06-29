@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -164,6 +165,34 @@ export class AuthService {
     return {
       message:
         'If the email is registered, a password reset link has been sent.',
+    };
+  }
+
+  async resetPassword(resetToken: string, newPassword: string) {
+    // Find the valid reset token Document from the DB
+    const token = await this.ResetTokenModel.findOne({
+      token: resetToken,
+      expiryDate: { $gte: new Date() },
+    });
+    // If token is not found or expired, throw an error
+    if (!token) {
+      throw new UnauthorizedException('Invalid or expired reset link');
+    }
+
+    // Change the user password if the token is valid and make it Hashed
+    const user = await this.UserModel.findById(token.userId);
+    if (!user) {
+      throw new InternalServerErrorException('User not found');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    // Delete the reset token after successful password reset for security
+    await this.ResetTokenModel.deleteOne({ _id: token._id });
+
+    return {
+      message: 'Password reset successfully',
     };
   }
 }
