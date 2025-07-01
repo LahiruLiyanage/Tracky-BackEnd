@@ -109,7 +109,7 @@ export class AuthService {
     // console.log('Token:', token);
     //Calculating expiry date 3 days from now
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 3);
+    expiryDate.setDate(expiryDate.getDate() + 5);
 
     await this.RefreshTokenModel.updateOne(
       { userId },
@@ -120,7 +120,11 @@ export class AuthService {
     );
   }
 
-  async changePassword(userId, oldPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    oldPassword: string,
+    newPassword: string,
+  ) {
     //Find the User
     const user = await this.UserModel.findById(userId);
     if (!user) {
@@ -148,7 +152,7 @@ export class AuthService {
     //If user exists, generate password reset link
     if (user) {
       const expiryDate = new Date();
-      expiryDate.setHours(expiryDate.getHours() + 1); // 1 hour expiry
+      expiryDate.setHours(expiryDate.getHours() + 3); // 1 hour expiry
 
       // Using nanoid package
       const resetToken = nanoid(64);
