@@ -36,4 +36,8 @@ export class TasksService {
     await this.taskModel.deleteOne({ _id: task._id });
     return { message: 'Task deleted successfully' };
   }
+
+  async getTasksByUserId(userId: string): Promise<Task[]> {
+    return this.taskModel.find({ userId }).exec();
+  }
 }

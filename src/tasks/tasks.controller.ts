@@ -6,26 +6,44 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task } from './dto/task.model';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
-  @Get()
-  getTasks(): Promise<Task[]> {
-    return this.tasksService.getAllTasks();
+  // @Get()
+  // getTasks(): Promise<Task[]> {
+  //   return this.tasksService.getAllTasks();
+  // }
+
+  @Get('all/:id')
+  @UseGuards(AuthGuard)
+  getTasks(@Param('id') id: string) {
+    console.log('User ID:', id);
+    return this.tasksService.getTasksByUserId(id);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   findOne(@Param('id') id: string): Promise<Task | null> {
     return this.tasksService.getTaskById(id);
   }
 
+  // @Post()
+  // async createTask(@Body() task: Task): Promise<Task> {
+  //   return this.tasksService.create(task);
+  // }
+
   @Post()
-  async createTask(@Body() task: Task): Promise<Task> {
+  @UseGuards(AuthGuard)
+  async createTask(@Body() task: Task, @Req() req): Promise<Task> {
+    task.userId = req.user.userId;
     return this.tasksService.create(task);
   }
 

@@ -15,6 +15,9 @@ export class Task {
 
   @Prop({ default: false })
   deleted?: boolean;
+
+  @Prop({ required: true })
+  userId: string;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

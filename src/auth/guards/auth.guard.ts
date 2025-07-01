@@ -32,7 +32,7 @@ export class AuthGuard implements CanActivate {
       // console.log('Payload:', payload);
       request.userId = payload.userId;
     } catch (error) {
-      Logger.error('Token verification failed', error);
+      console.log('Token verification failed', error);
       throw new UnauthorizedException('Invalid token');
     }
     return true;
