@@ -92,7 +92,7 @@ export class AuthService {
   }
 
   async generateUserTokens(userId: string) {
-    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '24h' });
 
     const refreshToken = uuidv4();
 
@@ -152,7 +152,7 @@ export class AuthService {
     //If user exists, generate password reset link
     if (user) {
       const expiryDate = new Date();
-      expiryDate.setHours(expiryDate.getHours() + 3); // 1 hour expiry
+      expiryDate.setHours(expiryDate.getHours() + 24); // 1 hour expiry
 
       // Using nanoid package
       const resetToken = nanoid(64);

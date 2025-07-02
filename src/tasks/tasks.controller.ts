@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { Task } from './dto/task.model';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { Task } from './schemas/task.schema';
 
 @Controller('tasks')
 export class TasksController {
@@ -47,17 +47,11 @@ export class TasksController {
     return this.tasksService.create(task);
   }
 
-  @Put(':id')
-  async updateTask(
-    @Param('id') id: string,
-    @Body() task: Task,
-  ): Promise<Task | { message: string }> {
-    const updatedTask = await this.tasksService.update(id, task);
-    if (updatedTask) {
-      return updatedTask;
-    } else {
-      return { message: 'Task not found' };
-    }
+  @Put('update/:id')
+  async updateTask(@Param('id') id: string, @Body() task: any): Promise<any> {
+    console.log('Updating task with ID:', id);
+    console.log('Task data:', task);
+    return this.tasksService.update(id, task);
   }
 
   @Delete(':id')

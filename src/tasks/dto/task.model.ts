@@ -1,6 +1,7 @@
 export class Task {
-  id: string;
+  id?: string;
   title: string;
   description: string;
   userId: any;
+  completed: boolean;
 }

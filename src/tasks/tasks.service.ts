@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Task, TaskDocument } from './schemas/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -21,10 +21,25 @@ export class TasksService {
     return createdTask.save();
   }
 
-  async update(id: string, task: Task): Promise<Task | null> {
+  async update(id: string, task: Task) {
     const found = await this.getTaskById(id);
-    if (!found) return null;
-    return this.taskModel.findOneAndUpdate({ id }, task, { new: true });
+    if (!found) {
+      throw new BadRequestException('Task not found');
+    }
+
+    const updatedTask = this.taskModel.updateOne({
+      id: id,
+      $set: {
+        completed: task.completed,
+      },
+    });
+
+    console.log(updatedTask, 'Updated Task');
+
+    if (!updatedTask) {
+      throw new BadRequestException('Failed to update task');
+    }
+    return updatedTask;
   }
 
   async delete(id: string): Promise<{ message: string }> {

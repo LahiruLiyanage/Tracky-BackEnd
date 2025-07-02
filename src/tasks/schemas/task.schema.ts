@@ -18,6 +18,9 @@ export class Task {
 
   @Prop({ required: true })
   userId: string;
+
+  @Prop({ default: false })
+  completed: boolean;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
