@@ -4,7 +4,7 @@ export type TaskDocument = Task & Document;
 
 @Schema()
 export class Task {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: false, unique: true })
   id: string;
 
   @Prop({ required: true, unique: true })
@@ -16,7 +16,7 @@ export class Task {
   @Prop({ default: false })
   deleted?: boolean;
 
-  @Prop({ required: true })
+  @Prop({ required: false, unique: true })
   userId: string;
 
   @Prop({ default: false })

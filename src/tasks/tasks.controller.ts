@@ -12,6 +12,7 @@ import {
 import { TasksService } from './tasks.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Task } from './schemas/task.schema';
+import { TaskDto } from './dto/task.model';
 
 @Controller('tasks')
 export class TasksController {
@@ -40,10 +41,11 @@ export class TasksController {
   //   return this.tasksService.create(task);
   // }
 
-  @Post()
+  @Post('create')
   @UseGuards(AuthGuard)
-  async createTask(@Body() task: Task, @Req() req): Promise<Task> {
-    task.userId = req.user.userId;
+  async createTask(@Body() task: TaskDto, @Req() req): Promise<Task> {
+    console.log('Creating task:', task);
+    // task.userId = req.user.userId;
     return this.tasksService.create(task);
   }
 
@@ -54,7 +56,7 @@ export class TasksController {
     return this.tasksService.update(id, task);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   async deleteTask(@Param('id') id: string): Promise<{ message: string }> {
     const task = await this.tasksService.getTaskById(id);
     if (task) {

@@ -12,38 +12,44 @@ export class TasksService {
     return tasks;
   }
 
-  async getTaskById(id: string) {
-    return this.taskModel.findOne({ id }).exec();
+  async getTaskById(_id: string) {
+    return this.taskModel.findOne({ _id }).exec();
   }
 
-  async create(task: Task): Promise<Task> {
+  async create(task: any): Promise<any> {
     const createdTask = new this.taskModel(task);
+    console.log('Creating task:', createdTask);
     return createdTask.save();
   }
 
   async update(id: string, task: Task) {
     const found = await this.getTaskById(id);
+    // console.log('Found task:', found);
     if (!found) {
       throw new BadRequestException('Task not found');
     }
+    // console.log('Updating task with ID:', id, task);
+    const updatedTask = await this.taskModel
+      .updateOne(
+        { _id: id },
+        {
+          $set: {
+            completed: task.completed,
+          },
+        },
+      )
+      .exec();
 
-    const updatedTask = this.taskModel.updateOne({
-      id: id,
-      $set: {
-        completed: task.completed,
-      },
-    });
+    // console.log(updatedTask, 'Updated Task');
 
-    console.log(updatedTask, 'Updated Task');
-
-    if (!updatedTask) {
+    if (updatedTask.modifiedCount === 0) {
       throw new BadRequestException('Failed to update task');
     }
     return updatedTask;
   }
 
   async delete(id: string): Promise<{ message: string }> {
-    console.log('Deleting task:', id);
+    // console.log('Deleting task:', id);
     const task = await this.getTaskById(id);
     if (!task) {
       return { message: 'Task not found' };
